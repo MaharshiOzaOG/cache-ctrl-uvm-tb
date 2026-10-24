@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.vcd
+*.wlf
+*.log
+regression/results/*/
+regression/results/merged_coverage.csv
+csrc/
+simv*
+work/
+*.vdb
+ucli.key

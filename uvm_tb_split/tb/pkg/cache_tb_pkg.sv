@@ -72,5 +72,7 @@ package cache_tb_pkg;
   `include "tests/cache_flush_test.sv"
   `include "tests/cache_flush_race_test.sv"
   `include "tests/cache_err_test.sv"
+  
+  `include "tests/cache_thrash_test.sv"
 
 endpackage

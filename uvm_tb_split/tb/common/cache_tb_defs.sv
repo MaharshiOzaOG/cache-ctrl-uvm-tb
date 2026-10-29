@@ -70,9 +70,28 @@ package cache_tb_defs_pkg;
     return byte'(a[7:0] ^ a[15:8] ^ a[23:16] ^ a[31:24] ^ 8'h5A) + byte'(a[3:0]);
   endfunction
 
+  // ----------------------------------------------------------------------------
+//  ONE CACHE LINE = 16 bytes = 4 words x 4 bytes   (LINE_BYTES=16, DATA_W=32)
+//
+//  word:         word 0       |      word 1       |      word 2       |      word 3
+//         +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+//  byte:  | B0 | B1 | B2 | B3 | B4 | B5 | B6 | B7 | B8 | B9 |B10 |B11 |B12 |B13 |B14 |B15 |
+//         +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+
+//  addr:  +0x0               +0x4                +0x8                +0xC
+//
+//  1 byte = 8 bits | 1 word = 4 bytes = 32 bits | 1 line = 4 words = 128 bits
+//  word = position (0..3), NOT a count: mk_addr(t, s, 2) -> 3rd word (B8..B11)
+//  wstrb[3:0] picks bytes inside the chosen word: 4'b0001 = lowest byte only
+//
+//  ADDRESS (32 bits):   [31 ........ 10][9 ...... 4][3  2][1  0]
+//                            tag            set      word  byte(=0)
+//  mk_addr(tag, set, word) = (tag << 10) | (set << 4) | (word << 2)
+//  e.g. mk_addr(1, 1, 2) = 0x400 | 0x10 | 0x8 = 0x418
+// ----------------------------------------------------------------------------
+
   // Build a byte address from (tag, set, word).  Same layout as the DUT:
   //   [ tag | set (SET_W) | word (OFF_W-BYTE_W) | byte (BYTE_W) ]
-  // OM: Note that 1 word is 2 bytes
+  // OM: Note that 1 word ==> 4 bytes (32 bits)
   function automatic addr_t mk_addr(int unsigned tag, int unsigned set, int unsigned word = 0);
     addr_t a;
     a = (addr_t'(tag) << (SET_W + OFF_W))

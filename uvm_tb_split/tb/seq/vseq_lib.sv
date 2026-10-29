@@ -123,17 +123,20 @@ class cache_thrash_vseq extends cache_base_vseq;
     //Now we know tat the set is empty now you can fill it up.
     //perform the ld operation on that paticular set.
     for(int i = 0; i < DUT_N_WAYS; i++) begin
-      mark();     ld(mk_addr( 10+i , temp_set, 0), r);          expect_traffic("clean_misses", 1, 0);
+      mark();     ld(mk_addr( 10+i , temp_set, 0), r);          
+                  expect_traffic("clean_misses", 1, 0);
     end
 
 
     for(int i = 0; i < 20; i++) begin
-      mark();     ld(mk_addr( 10+i+ DUT_N_WAYS , temp_set, 0), r);          expect_traffic("clean_misses", 1, 0);
+      mark();     ld(mk_addr( 10+i+ DUT_N_WAYS , temp_set, 0), r);          
+                  expect_traffic("clean_misses", 1, 0);
     end
 
     // int temp_set = 7;
     for(int i = 0; i < 20; i++) begin
-      mark();     st(mk_addr( 10+(2*DUT_N_WAYS)+i , temp_set, 0), 32'hA000_0000 + i, 4'b1111, r);          expect_traffic("thrash", 1, (i<DUT_N_WAYS) ? 0:1);
+      mark();     st(mk_addr( 10+(2*DUT_N_WAYS)+i , temp_set, 0), 32'hA000_0000 + i, 4'b1111, r);          
+                  expect_traffic("thrash", 1, (i<DUT_N_WAYS) ? 0:1);
     end
 
 

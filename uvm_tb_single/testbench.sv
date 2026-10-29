@@ -363,6 +363,7 @@ class cache_cfg extends uvm_object;
 
   int unsigned cpu_rsp_ready_pct = 70;
   int unsigned cpu_gap_max       = 2;
+  bit cpu_b2b_only = 0;
   int unsigned max_outstanding   = 1;
   int unsigned rsp_timeout       = 5000;
 
@@ -423,6 +424,14 @@ class cache_cfg_err extends cache_cfg;
   endfunction
 endclass
 
+class cache_cfg_b2b extends cache_cfg;
+  `uvm_object_utils(cache_cfg_b2b)
+  function new(string name = "cache_cfg_b2b");
+    super.new(name);
+    cpu_b2b_only = 1;
+  endfunction
+endclass
+
 // ---- agents/cpu_agent/cpu_seqr.sv ----
 class cpu_seqr extends uvm_sequencer #(cpu_item);
 
@@ -473,7 +482,9 @@ class cpu_drv extends uvm_driver #(cpu_item);
       seq_item_port.get(req);
 
       while (outstanding >= cfg.max_outstanding) @(vif.drv_cb);
-      repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);
+
+      if(!cfg.cpu_b2b_only)
+        repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);
 
       while (inflight.exists(next_id)) next_id++;
       req.id = next_id;
@@ -2055,7 +2066,27 @@ class cache_thrash_test extends cache_base_test;
   endtask
 
 endclass
+// ---- tests/cache_b2b_test.sv ----
+class cache_b2b_test extends cache_base_test;
 
+  `uvm_component_utils(cache_rand_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction
+
+  function void build_phase(uvm_phase phase);
+    uvm_factory::get().set_type_override_by_type(cache_cfg::get_type(), cache_cfg_b2b::get_type());
+    super.build_phase(phase);
+  endfunction
+
+  task run_scenario();
+    cache_rand_vseq v = cache_rand_vseq::type_id::create("v");
+    v.n_ops = 2000; v.flush_every = 500;
+    v.start(env.vseqr);
+  endtask
+
+endclass
 endpackage
 
 // ---- top/tb_top.sv ----

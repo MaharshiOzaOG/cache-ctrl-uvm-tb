@@ -12,7 +12,7 @@
 //==============================================================================
 class cache_b2b_test extends cache_base_test;
 
-  `uvm_component_utils(cache_rand_test)
+  `uvm_component_utils(cache_b2b_test)
 
   function new(string name, uvm_component parent);
     super.new(name, parent);

@@ -58,6 +58,9 @@ class cpu_drv extends uvm_driver #(cpu_item);
   id_t          next_id;
   bit           rsp_ready_now;     // rsp_ready value the DUT sees at the next edge
 
+  // D1: adding config knob
+  // bit cpu_b2b_only;
+
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
@@ -86,7 +89,9 @@ class cpu_drv extends uvm_driver #(cpu_item);
       seq_item_port.get(req);                                   // WAIT: next item from the sequence
 
       while (outstanding >= cfg.max_outstanding) @(vif.drv_cb); // WAIT: a free slot (v1: previous answer back)
-      repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);// DELAY: random idle cycles between requests
+
+      if(!cfg.cpu_b2b_only)
+        repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);// DELAY: random idle cycles between requests
 
       while (inflight.exists(next_id)) next_id++;               // pick an id not in flight
       req.id = next_id;

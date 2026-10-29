@@ -55,6 +55,7 @@ class cache_cfg extends uvm_object;
   // ---------------- CPU side -----------------------------------------------
   int unsigned cpu_rsp_ready_pct = 70;
   int unsigned cpu_gap_max       = 2;
+  bit cpu_b2b_only = 0;   // 1 = no idle cycles between CPU requests
   int unsigned max_outstanding   = 1;      // v1 DUT is blocking
   int unsigned rsp_timeout       = 5000;
 
@@ -121,5 +122,13 @@ class cache_cfg_err extends cache_cfg;              // default timing + memory e
     super.new(name);
     mem_rd_err_pct = 5;
     mem_wr_err_pct = 5;
+  endfunction
+endclass
+
+class cache_cfg_b2b extends cache_cfg;
+  `uvm_object_utils(cache_cfg_b2b)
+  function new(string name = "cache_cfg_b2b");
+    super.new(name);
+    cpu_b2b_only = 1;
   endfunction
 endclass

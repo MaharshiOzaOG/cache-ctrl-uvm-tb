@@ -1644,6 +1644,36 @@ class cache_base_vseq extends uvm_sequence;
 
 endclass
 
+class cache_thrash_vseq extends cache_base_vseq;
+  `uvm_object_utils(cache_thrash_vseq)
+  function new(string name = "cache_thrash_vseq"); super.new(name); endfunction
+
+  task body();
+
+    cpu_item     r;
+    bit          ferr;
+    int unsigned temp_set = 7;
+
+    do_flush(1'b1, ferr);
+
+    for(int i = 0; i < DUT_N_WAYS; i++) begin
+      mark();     ld(mk_addr( 10+i , temp_set, 0), r);
+                  expect_traffic("clean_misses", 1, 0);
+    end
+
+    for(int i = 0; i < 20; i++) begin
+      mark();     ld(mk_addr( 10+i+ DUT_N_WAYS , temp_set, 0), r);
+                  expect_traffic("clean_misses", 1, 0);
+    end
+
+    for(int i = 0; i < 20; i++) begin
+      mark();     st(mk_addr( 10+(2*DUT_N_WAYS)+i , temp_set, 0), 32'hA000_0000 + i, 4'b1111, r);
+                  expect_traffic("thrash", 1, (i<DUT_N_WAYS) ? 0:1);
+    end
+
+  endtask
+endclass
+
 class cache_smoke_vseq extends cache_base_vseq;
   `uvm_object_utils(cache_smoke_vseq)
   function new(string name = "cache_smoke_vseq"); super.new(name); endfunction
@@ -2000,6 +2030,27 @@ class cache_err_test extends cache_base_test;
   task run_scenario();
     cache_rand_vseq v = cache_rand_vseq::type_id::create("v");
     v.n_ops = 1000; v.flush_every = 250;
+    v.start(env.vseqr);
+  endtask
+
+endclass
+
+// ---- tests/cache_thrash_test.sv ----
+class cache_thrash_test extends cache_base_test;
+
+  `uvm_component_utils(cache_thrash_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction
+
+  function void build_phase(uvm_phase phase);
+    cache_cfg::type_id::set_type_override(cache_cfg_quiet::get_type());
+    super.build_phase(phase);
+  endfunction
+
+  task run_scenario();
+    cache_thrash_vseq v = cache_thrash_vseq::type_id::create("v");
     v.start(env.vseqr);
   endtask
 

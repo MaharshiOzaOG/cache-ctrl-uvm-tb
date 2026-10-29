@@ -106,6 +106,40 @@ class cache_base_vseq extends uvm_sequence;
 
 endclass
 
+//------------------------------------------------------------------------------
+class cache_thrash_vseq extends cache_base_vseq;
+  `uvm_object_utils(cache_thrash_vseq)
+  function new(string name = "cache_thrash_vseq"); super.new(name); endfunction
+
+  task body();
+
+    cpu_item     r;
+    bit          ferr;
+    int unsigned temp_set = 7;
+
+    // start cold: write everything back and invalidate
+    do_flush(1'b1, ferr);
+
+    //Now we know tat the set is empty now you can fill it up.
+    //perform the ld operation on that paticular set.
+    for(int i = 0; i < DUT_N_WAYS; i++) begin
+      mark();     ld(mk_addr( 10+i , temp_set, 0), r);          expect_traffic("clean_misses", 1, 0);
+    end
+
+
+    for(int i = 0; i < 20; i++) begin
+      mark();     ld(mk_addr( 10+i+ DUT_N_WAYS , temp_set, 0), r);          expect_traffic("clean_misses", 1, 0);
+    end
+
+    // int temp_set = 7;
+    for(int i = 0; i < 20; i++) begin
+      mark();     st(mk_addr( 10+(2*DUT_N_WAYS)+i , temp_set, 0), 32'hA000_0000 + i, 4'b1111, r);          expect_traffic("thrash", 1, (i<DUT_N_WAYS) ? 0:1);
+    end
+
+
+
+  endtask
+endclass
 
 //------------------------------------------------------------------------------
 class cache_smoke_vseq extends cache_base_vseq;

@@ -72,6 +72,7 @@ package cache_tb_defs_pkg;
 
   // Build a byte address from (tag, set, word).  Same layout as the DUT:
   //   [ tag | set (SET_W) | word (OFF_W-BYTE_W) | byte (BYTE_W) ]
+  // OM: Note that 1 word is 2 bytes
   function automatic addr_t mk_addr(int unsigned tag, int unsigned set, int unsigned word = 0);
     addr_t a;
     a = (addr_t'(tag) << (SET_W + OFF_W))

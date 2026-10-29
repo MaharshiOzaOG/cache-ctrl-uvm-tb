@@ -1,0 +1,33 @@
+# Rebuild uvm_tb_single/testbench.sv whenever the split testbench changes on dev.
+name: make-single (dev)
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "uvm_tb_split/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Generate single-file testbench
+        run: python3 uvm_tb_split/make_single.py
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- uvm_tb_single; then
+            echo "testbench.sv unchanged"
+          else
+            git config user.name  "Maharshi Mukeshkumar Oza"
+            git config user.email "maharshi.oza.00@gmail.com"
+            git add uvm_tb_single
+            git commit -m "Regenerate uvm_tb_single/testbench.sv"
+            git push
+          fi

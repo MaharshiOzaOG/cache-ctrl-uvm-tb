@@ -173,6 +173,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
         seq_item_port.put(inflight[i]);     //This is going to be captured by the
                                             //get_response(rsp, it.get_transaction_id());
                                             //which is present in task do_op();
+        n++;
       end
       inflight.delete();                    // no index = delete ALL entries, once
 
@@ -183,6 +184,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
       end
       outstanding = 0;
       next_id     = 0;
+      n++;
       `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
   endtask
 endclass

@@ -168,6 +168,7 @@ class cpu_item extends uvm_sequence_item;
        int unsigned    lat_cycles;
        int unsigned    rsp_bp_cycles;
        outcome_e       outcome;
+       bit             aborted = 0;
 
   constraint c_align { addr[BYTE_W-1:0] == '0; }
   constraint c_strb  { we  -> (wstrb != '0);
@@ -366,6 +367,7 @@ class cache_cfg extends uvm_object;
   bit cpu_b2b_only = 0;
   int unsigned max_outstanding   = 1;
   int unsigned rsp_timeout       = 5000;
+  int unsigned cpu_rsp_timeout = 2000;
 
   int unsigned mem_req_ready_pct = 70;
   int unsigned mem_lat_min       = 0;
@@ -457,6 +459,8 @@ class cpu_drv extends uvm_driver #(cpu_item);
   id_t          next_id;
   bit           rsp_ready_now;
 
+  cpu_item      cur_req;
+
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
@@ -473,11 +477,18 @@ class cpu_drv extends uvm_driver #(cpu_item);
     fork
       request_thread();
       response_thread();
-    join
+      timeout_thread();
+    join_none
+
+    wait( vif.rst_n === 'b0);
+    disable fork;
+
+    reset_state();
   endtask
 
   task request_thread();
     cpu_item req;
+
     forever begin
       seq_item_port.get(req);
 
@@ -486,7 +497,9 @@ class cpu_drv extends uvm_driver #(cpu_item);
       if(!cfg.cpu_b2b_only)
         repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);
 
-      while (inflight.exists(next_id)) next_id++;
+      while (inflight.exists(next_id))
+        next_id++;
+
       req.id = next_id;
       next_id++;
 
@@ -539,6 +552,30 @@ class cpu_drv extends uvm_driver #(cpu_item);
     end
   endtask
 
+  task timeout_thread();
+
+  endtask
+
+  task reset_state();
+    @(vif.drv_cb);
+      vif.drv_cb.req_valid <= 0;
+      vif.drv_cb.rsp_ready <= 0;
+
+      foreach(inflight[i]) begin
+        inflight[i].aborted = 1;
+        seq_item_port.put(inflight[i]);
+      end
+      inflight.delete();
+
+      if(cur_req != null) begin
+        cur_req.aborted = 1'b1;
+        seq_item_port.put(cur_req);
+        cur_req = null;
+      end
+      outstanding = 0;
+      next_id     = 0;
+      `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
+  endtask
 endclass
 // ---- agents/cpu_agent/cpu_mon.sv ----
 class cpu_mon extends uvm_monitor;
@@ -1501,6 +1538,9 @@ class cpu_base_seq extends uvm_sequence #(cpu_item);
     start_item(it);
     finish_item(it);
     get_response(rsp, it.get_transaction_id());
+
+    if (rsp.aborted)
+    `uvm_info("CPU_SEQ", {"aborted by reset: ", rsp.convert2string()}, UVM_MEDIUM)
   endtask
 
 endclass
@@ -1515,7 +1555,6 @@ class cpu_op_seq extends cpu_base_seq;
   strb_t   op_wstrb = '1;
 
   cpu_item rsp_item;
-
   function new(string name = "cpu_op_seq");
     super.new(name);
   endfunction

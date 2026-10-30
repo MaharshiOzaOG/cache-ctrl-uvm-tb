@@ -564,6 +564,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
       foreach(inflight[i]) begin
         inflight[i].aborted = 1;
         seq_item_port.put(inflight[i]);
+        n++;
       end
       inflight.delete();
 
@@ -574,6 +575,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
       end
       outstanding = 0;
       next_id     = 0;
+      n++;
       `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
   endtask
 endclass

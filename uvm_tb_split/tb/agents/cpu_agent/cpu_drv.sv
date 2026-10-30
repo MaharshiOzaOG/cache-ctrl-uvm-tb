@@ -58,9 +58,8 @@ class cpu_drv extends uvm_driver #(cpu_item);
   id_t          next_id;
   bit           rsp_ready_now;     // rsp_ready value the DUT sees at the next edge
 
-  // D1: adding config knob
-  // bit cpu_b2b_only;
-
+  cpu_item      cur_req;     // NEW: taken from the sequence, not yet accepted by the cache
+  
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
@@ -77,7 +76,13 @@ class cpu_drv extends uvm_driver #(cpu_item);
     fork
       request_thread();
       response_thread();
-    join
+      timeout_thread();
+    join_none
+
+    wait( vif.rst_n === 'b0);           //wait when exp is false i.e rst == 1
+    disable fork;
+
+    reset_state();
   endtask
 
   // --------------------------------------------------------------------------
@@ -85,6 +90,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
   // --------------------------------------------------------------------------
   task request_thread();
     cpu_item req;
+    
     forever begin
       seq_item_port.get(req);                                   // WAIT: next item from the sequence
 
@@ -93,9 +99,12 @@ class cpu_drv extends uvm_driver #(cpu_item);
       if(!cfg.cpu_b2b_only)
         repeat ($urandom_range(0, cfg.cpu_gap_max)) @(vif.drv_cb);// DELAY: random idle cycles between requests
 
-      while (inflight.exists(next_id)) next_id++;               // pick an id not in flight
+      while (inflight.exists(next_id)) 
+        next_id++;               // pick an id not in flight
+
       req.id = next_id;
       next_id++;
+      
 
       @(vif.drv_cb);                                            // WAIT: land on an edge before driving
       vif.drv_cb.req_valid <= 1'b1;
@@ -150,4 +159,30 @@ class cpu_drv extends uvm_driver #(cpu_item);
     end
   endtask
 
+  task timeout_thread();
+
+  endtask
+
+  task reset_state();
+    @(vif.drv_cb);
+      vif.drv_cb.req_valid <= 0;
+      vif.drv_cb.rsp_ready <= 0;
+
+      foreach(inflight[i]) begin
+        inflight[i].aborted = 1;
+        seq_item_port.put(inflight[i]);     //This is going to be captured by the
+                                            //get_response(rsp, it.get_transaction_id());
+                                            //which is present in task do_op();
+      end
+      inflight.delete();                    // no index = delete ALL entries, once
+
+      if(cur_req != null) begin
+        cur_req.aborted = 1'b1;
+        seq_item_port.put(cur_req);
+        cur_req = null;
+      end
+      outstanding = 0;
+      next_id     = 0;
+      `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
+  endtask
 endclass

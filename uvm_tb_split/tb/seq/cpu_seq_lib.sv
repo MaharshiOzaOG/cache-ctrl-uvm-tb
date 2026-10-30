@@ -39,10 +39,13 @@ class cpu_base_seq extends uvm_sequence #(cpu_item);
   // object (the driver fills rdata/err/lat_cycles in), so after this returns
   // `it` holds the result.
   task do_op(cpu_item it);
-    cpu_item rsp;
+    cpu_item rsp;             //This is created for capturing from the <it> obj.
     start_item(it);                                             // WAIT: driver ready to take an item
     finish_item(it);                                            // returns as soon as the driver get()s it
     get_response(rsp, it.get_transaction_id());                 // WAIT: the DUT's answer
+
+    if (rsp.aborted)
+    `uvm_info("CPU_SEQ", {"aborted by reset: ", rsp.convert2string()}, UVM_MEDIUM)
   endtask
 
 endclass
@@ -60,8 +63,8 @@ class cpu_op_seq extends cpu_base_seq;
   strb_t   op_wstrb = '1;
 
   // result after start() returns
-  cpu_item rsp_item;
-
+  cpu_item rsp_item;                //GOOD NOTE this rsp_item is written so that it will be used by the vseq to get the resut thus u might feel like 
+                                    //u might feel Y rsp_item is written instead of req_item.
   function new(string name = "cpu_op_seq");
     super.new(name);
   endfunction

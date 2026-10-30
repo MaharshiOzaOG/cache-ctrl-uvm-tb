@@ -47,6 +47,7 @@ class cpu_item extends uvm_sequence_item;
        int unsigned    lat_cycles;     // accept -> response, in cycles
        int unsigned    rsp_bp_cycles;  // cycles rsp_valid waited for rsp_ready
        outcome_e       outcome;        // filled by the scoreboard
+       bit             aborted = 0;    // U1
 
   constraint c_align { addr[BYTE_W-1:0] == '0; }
   constraint c_strb  { we  -> (wstrb != '0);

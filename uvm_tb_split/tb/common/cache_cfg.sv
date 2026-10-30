@@ -58,6 +58,7 @@ class cache_cfg extends uvm_object;
   bit cpu_b2b_only = 0;   // 1 = no idle cycles between CPU requests
   int unsigned max_outstanding   = 1;      // v1 DUT is blocking
   int unsigned rsp_timeout       = 5000;
+  int unsigned cpu_rsp_timeout = 2000;
 
   // ---------------- memory side ---------------------------------------------
   int unsigned mem_req_ready_pct = 70;

@@ -557,6 +557,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
   endtask
 
   task reset_state();
+    int unsigned n = 0;
     @(vif.drv_cb);
       vif.drv_cb.req_valid <= 0;
       vif.drv_cb.rsp_ready <= 0;

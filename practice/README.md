@@ -3,6 +3,7 @@
 Author: Maharshi Oza
 
 - **Detailed plan (phases, files, steps):** [`ROADMAP.md`](ROADMAP.md)
+- **U1–U4 step-by-step instructions:** [`UPGRADES.md`](UPGRADES.md)
 - **Earlier full backlog (archived, for reference only):** [`archive/practice_backlog_v1.md`](archive/practice_backlog_v1.md)
 
 **Status key:** ✅ done · 🟡 in progress · ⬜ to do

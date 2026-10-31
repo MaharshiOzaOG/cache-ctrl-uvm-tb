@@ -72,17 +72,18 @@ class cpu_drv extends uvm_driver #(cpu_item);
   endfunction
 
   task run_phase(uvm_phase phase);
-    wait (vif.rst_n === 1'b1);           // WAIT: reset released
-    fork
-      request_thread();
-      response_thread();
-      timeout_thread();
-    join_none
+    forever begin                           //Cause after the reset is done might have new request to handle them.
+      wait (vif.rst_n === 1'b1);           // WAIT: reset released
+      fork
+        request_thread();
+        response_thread();
+      join_none
 
-    wait( vif.rst_n === 'b0);           //wait when exp is false i.e rst == 1
-    disable fork;
+      wait( vif.rst_n === 'b0);           //wait when exp is false i.e rst == 1
+      disable fork;
 
-    reset_state();
+      reset_state();
+    end
   endtask
 
   // --------------------------------------------------------------------------
@@ -93,6 +94,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
     
     forever begin
       seq_item_port.get(req);                                   // WAIT: next item from the sequence
+      cur_req = req;
 
       while (outstanding >= cfg.max_outstanding) @(vif.drv_cb); // WAIT: a free slot (v1: previous answer back)
 
@@ -120,6 +122,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
       // The handshake happened on this edge.
       req.t_accept       = $time;
       inflight[req.id]   = req;
+      cur_req = null;                                           //U1
       outstanding++;
       vif.drv_cb.req_valid <= 1'b0;
       `uvm_info("CPU_DRV", {"accepted   ", req.convert2string()}, UVM_HIGH)

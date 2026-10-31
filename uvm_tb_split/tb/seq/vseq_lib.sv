@@ -7,7 +7,10 @@
 //            start real sequences on the CPU / flush sequencers.
 //
 //    cache_base_vseq        helpers: ld(), st(), do_flush(), rand_ops(),
-//                           wait_cycles(), mark() + expect_traffic()
+//                           wait_cycles(), mark() + expect_traffic(), pulse_reset()
+//    cache_reset_vseq       random traffic, flush, loads only, then a reset
+//                           pulse at a random moment during the loads
+//    cache_thrash_vseq      set-7 eviction stream
 //    cache_smoke_vseq       a few random accesses, quiet timing
 //    cache_directed_vseq    T1..T9 from the old plain testbench, with EXACT
 //                           refill/writeback counts checked
@@ -126,10 +129,33 @@ endclass
 class cache_reset_vseq extends cache_base_vseq;
   `uvm_object_utils(cache_reset_vseq)
 
-  function new(string name = "cache_reset_test"); super.new(name); endfunction
+  function new(string name = "cache_reset_vseq"); super.new(name); endfunction
 
   task body();
-    
+    bit err;
+
+    // run the random accesses (ld + st)
+    rand_ops(50);
+
+    // flush without invalidate: reset loses dirty lines, memory must hold all stores
+    do_flush(1'b0, err);
+
+    // switch to load only
+    p_sequencer.cfg.store_pct = 0;
+
+    // load ops (rand)
+    rand_ops(30);
+
+    fork
+      rand_ops(30);
+      begin
+      wait_cycles($urandom_range(10, 100));     //based on random delay the reset will trigger.
+      pulse_reset();
+      end
+    join
+    //need to check if the reset was successful and the cache is in the expected state
+    p_sequencer.cfg.store_pct = 50;
+    rand_ops(30);
   endtask
 endclass
 

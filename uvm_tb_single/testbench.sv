@@ -556,10 +556,6 @@ class cpu_drv extends uvm_driver #(cpu_item);
     end
   endtask
 
-  task timeout_thread();
-
-  endtask
-
   task reset_state();
     int unsigned n = 0;
     @(vif.drv_cb);
@@ -577,10 +573,10 @@ class cpu_drv extends uvm_driver #(cpu_item);
         cur_req.aborted = 1'b1;
         seq_item_port.put(cur_req);
         cur_req = null;
+        n++;
       end
       outstanding = 0;
       next_id     = 0;
-      n++;
       `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
   endtask
 endclass
@@ -1717,10 +1713,28 @@ endclass
 class cache_reset_vseq extends cache_base_vseq;
   `uvm_object_utils(cache_reset_vseq)
 
-  function new(string name = "cache_reset_test"); super.new(name); endfunction
+  function new(string name = "cache_reset_vseq"); super.new(name); endfunction
 
   task body();
+    bit err;
 
+    rand_ops(50);
+
+    do_flush(1'b0, err);
+
+    p_sequencer.cfg.store_pct = 0;
+
+    rand_ops(30);
+
+    fork
+      rand_ops(30);
+      begin
+      wait_cycles($urandom_range(10, 100));
+      pulse_reset();
+      end
+    join
+    p_sequencer.cfg.store_pct = 50;
+    rand_ops(30);
   endtask
 endclass
 
@@ -2152,6 +2166,25 @@ class cache_b2b_test extends cache_base_test;
   task run_scenario();
     cache_rand_vseq v = cache_rand_vseq::type_id::create("v");
     v.n_ops = 2000; v.flush_every = 500;
+    v.start(env.vseqr);
+  endtask
+
+endclass
+// ---- tests/cache_reset_test.sv ----
+class cache_reset_test extends cache_base_test;
+
+  `uvm_component_utils(cache_reset_test)
+
+  function new(string name, uvm_component parent);
+    super.new(name, parent);
+  endfunction
+
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+  endfunction
+
+  task run_scenario();
+    cache_reset_vseq v = cache_reset_vseq::type_id::create("v");
     v.start(env.vseqr);
   endtask
 

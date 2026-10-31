@@ -23,6 +23,8 @@
 //  WATCH OUT:
 //    - Never send an item without collecting its response, or cpu_seqr's
 //      response queue overflows (UVM error).
+//    - After a reset the response may be an aborted item (aborted = 1); do_op()
+//      logs it. Its rdata/err are not a real answer.
 //==============================================================================
 
 //------------------------------------------------------------------------------

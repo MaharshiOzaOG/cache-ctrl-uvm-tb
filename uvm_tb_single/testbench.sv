@@ -88,6 +88,8 @@ interface cache_cpu_if (input logic clk, input logic rst_n);
   logic                 flush_done;
   logic                 flush_err;
 
+  logic tb_reset_req = 1'b0;
+
   clocking drv_cb @(posedge clk);
     default input #1step output #1;
     output req_valid, req_id, req_we, req_addr, req_wdata, req_wstrb;
@@ -367,7 +369,6 @@ class cache_cfg extends uvm_object;
   bit cpu_b2b_only = 0;
   int unsigned max_outstanding   = 1;
   int unsigned rsp_timeout       = 5000;
-  int unsigned cpu_rsp_timeout = 2000;
 
   int unsigned mem_req_ready_pct = 70;
   int unsigned mem_lat_min       = 0;
@@ -2147,7 +2148,7 @@ module tb_top;
 
   always #(CLK_PERIOD / 2) clk = ~clk;
 
-  initial begin
+  always @(posedge cpu_if.tb_reset_req) begin
     rst_n = 1'b0;
     repeat (5) @(posedge clk);
     @(negedge clk);

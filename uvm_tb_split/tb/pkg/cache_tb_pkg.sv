@@ -75,4 +75,5 @@ package cache_tb_pkg;
 
   `include "tests/cache_thrash_test.sv"
   `include "tests/cache_b2b_test.sv"
+  `include "tests/cache_reset_test.sv"
 endpackage

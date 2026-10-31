@@ -79,6 +79,10 @@ interface cache_cpu_if (input logic clk, input logic rst_n);
   logic                 flush_done;
   logic                 flush_err;
 
+
+  //OTHER SIGNALS
+  logic tb_reset_req = 1'b0;   // testbench-only: request a reset pulse (not connected to the DUT)
+
   // cpu_drv: drives the request channel and rsp_ready
   clocking drv_cb @(posedge clk);
     default input #1step output #1;

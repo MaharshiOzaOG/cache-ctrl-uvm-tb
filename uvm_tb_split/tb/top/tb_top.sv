@@ -45,13 +45,21 @@ module tb_top;
 
   always #(CLK_PERIOD / 2) clk = ~clk;
 
-  initial begin
+  // initial begin
+  //   rst_n = 1'b0;
+  //   repeat (5) @(posedge clk);
+  //   @(negedge clk);
+  //   rst_n = 1'b1;
+  // end
+
+  // mid-test reset: a rising edge on cpu_if.tb_reset_req pulses rst_n for 5 cycles
+  always @(posedge cpu_if.tb_reset_req) begin
     rst_n = 1'b0;
     repeat (5) @(posedge clk);
     @(negedge clk);
     rst_n = 1'b1;
   end
-
+  
   // ---------------- interfaces ---------------------------------------------
   cache_cpu_if cpu_if (.clk(clk), .rst_n(rst_n));
   cache_mem_if mem_if (.clk(clk), .rst_n(rst_n));

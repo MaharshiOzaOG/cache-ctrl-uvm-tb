@@ -3,8 +3,7 @@
 //  Author  : Maharshi Oza  (mmoza@ncsu.edu)
 //  Project : cache_ctrl UVM testbench v2.1
 //------------------------------------------------------------------------------
-//  WHAT    : Smallest possible run: 30 random accesses, no backpressure, no latency.
-//            Run it first, to check the environment works at all.
+//  WHAT    : Set-7 eviction stream (cache_thrash_vseq).
 //  CONFIG  : cache_cfg_quiet   (factory type override of cache_cfg, see build_phase)
 //  START   : always from reset (own simulation): cache empty, memory = initial
 //            pattern, scoreboard empty.

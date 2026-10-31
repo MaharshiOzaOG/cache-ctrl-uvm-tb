@@ -2204,6 +2204,13 @@ module tb_top;
 
   always #(CLK_PERIOD / 2) clk = ~clk;
 
+  initial begin
+    rst_n = 1'b0;
+    repeat (5) @(posedge clk);
+    @(negedge clk);
+    rst_n = 1'b1;
+  end
+
   always @(posedge cpu_if.tb_reset_req) begin
     rst_n = 1'b0;
     repeat (5) @(posedge clk);

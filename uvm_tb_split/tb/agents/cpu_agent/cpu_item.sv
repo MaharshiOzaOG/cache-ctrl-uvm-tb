@@ -14,6 +14,7 @@
 //    response (filled after the answer) : rdata, err, rsp_we
 //    info     (filled by drv/mon/sb)     : t_accept, t_rsp, lat_cycles,
 //                                          rsp_bp_cycles, outcome
+//    aborted  (set by cpu_drv, NOT random): 1 = cancelled by reset, no real answer
 //
 //  CONSTRAINTS
 //    - addr is word aligned (the DUT ignores the low byte bits anyway).

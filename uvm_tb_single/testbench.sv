@@ -473,17 +473,18 @@ class cpu_drv extends uvm_driver #(cpu_item);
   endfunction
 
   task run_phase(uvm_phase phase);
-    wait (vif.rst_n === 1'b1);
-    fork
-      request_thread();
-      response_thread();
-      timeout_thread();
-    join_none
+    forever begin
+      wait (vif.rst_n === 1'b1);
+      fork
+        request_thread();
+        response_thread();
+      join_none
 
-    wait( vif.rst_n === 'b0);
-    disable fork;
+      wait( vif.rst_n === 'b0);
+      disable fork;
 
-    reset_state();
+      reset_state();
+    end
   endtask
 
   task request_thread();
@@ -491,6 +492,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
 
     forever begin
       seq_item_port.get(req);
+      cur_req = req;
 
       while (outstanding >= cfg.max_outstanding) @(vif.drv_cb);
 
@@ -516,6 +518,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
 
       req.t_accept       = $time;
       inflight[req.id]   = req;
+      cur_req = null;
       outstanding++;
       vif.drv_cb.req_valid <= 1'b0;
       `uvm_info("CPU_DRV", {"accepted   ", req.convert2string()}, UVM_HIGH)

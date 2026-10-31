@@ -1643,6 +1643,19 @@ class cache_base_vseq extends uvm_sequence;
     super.new(name);
   endfunction
 
+  task pulse_reset();
+    virtual cache_cpu_if v = p_sequencer.cfg.cpu_vif;
+
+    `uvm_info("VSEQ", "requesting mid-test reset", UVM_MEDIUM)
+
+    v.tb_reset_req = 1'b1;
+    @(posedge v.clk);
+    v.tb_reset_req = 1'b0;
+
+    wait (v.rst_n === 1'b0);
+    wait (v.rst_n === 1'b1);
+  endtask
+
   task ld(addr_t a, output cpu_item r);
     cpu_op_seq s = cpu_op_seq::type_id::create("ld");
     s.op_we   = 1'b0;
@@ -1699,6 +1712,16 @@ class cache_base_vseq extends uvm_sequence;
       `uvm_error("DIRECTED", $sformatf("%s: got %0d, expected %0d", step, got, exp))
   endfunction
 
+endclass
+
+class cache_reset_vseq extends cache_base_vseq;
+  `uvm_object_utils(cache_reset_vseq)
+
+  function new(string name = "cache_reset_test"); super.new(name); endfunction
+
+  task body();
+
+  endtask
 endclass
 
 class cache_thrash_vseq extends cache_base_vseq;

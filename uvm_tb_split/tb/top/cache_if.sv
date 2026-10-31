@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 //  WHAT    : The two bundles of wires between the testbench and the DUT.
 //              cache_cpu_if : CPU request/response + flush control
+//                             (+ tb_reset_req: testbench only, not on the DUT)
 //              cache_mem_if : line-level memory request/response
 //            tb_top connects these wires to the DUT ports; the UVM classes get
 //            a handle to them (a "virtual interface") through cache_cfg.

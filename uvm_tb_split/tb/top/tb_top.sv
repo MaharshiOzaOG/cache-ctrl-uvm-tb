@@ -23,8 +23,6 @@
 //  WATCH OUT:
 //    - Reset is released on a FALLING clock edge, so it never changes at the
 //      same moment as a rising edge (no race with the DUT's flops).
-//    - Mid-test reset: a rising edge of cpu_if.tb_reset_req pulses rst_n low
-//      (see pulse_reset() in vseq_lib.sv).
 //    - The DUT parameters come from cache_tb_defs_pkg, the same numbers the
 //      classes use.
 //    - Waves (dump.vcd): by default only the interface pins + DUT top level.
@@ -47,12 +45,12 @@ module tb_top;
 
   always #(CLK_PERIOD / 2) clk = ~clk;
 
-  // initial begin
-  //   rst_n = 1'b0;
-  //   repeat (5) @(posedge clk);
-  //   @(negedge clk);
-  //   rst_n = 1'b1;
-  // end
+  initial begin
+    rst_n = 1'b0;
+    repeat (5) @(posedge clk);
+    @(negedge clk);
+    rst_n = 1'b1;
+  end
 
   // mid-test reset: a rising edge on cpu_if.tb_reset_req pulses rst_n for 5 cycles
   always @(posedge cpu_if.tb_reset_req) begin

@@ -39,6 +39,11 @@
 //    3) The driver, not the sequence, assigns the request id, so ids are
 //       always unique among requests in flight.
 //
+//  RESET (run_phase loops, so reset can come at any time)
+//    rst_n low -> disable both threads -> reset_state(): every unfinished item
+//    (inflight[] and cur_req) goes back to the sequence with aborted = 1, state
+//    is cleared, and the threads restart when rst_n is high again.
+//
 //  WATCH OUT:
 //    - The sequence must call get_response() for every item (do_op() does).
 //    - rsp_ready is random every cycle, even when no response is waiting.
@@ -79,7 +84,7 @@ class cpu_drv extends uvm_driver #(cpu_item);
         response_thread();
       join_none
 
-      wait( vif.rst_n === 'b0);           //wait when exp is false i.e rst == 1
+      wait( vif.rst_n === 'b0);           // WAIT: reset asserted
       disable fork;
 
       reset_state();
@@ -162,9 +167,6 @@ class cpu_drv extends uvm_driver #(cpu_item);
     end
   endtask
 
-  task timeout_thread();
-
-  endtask
 
   task reset_state();
     int unsigned n = 0;
@@ -185,10 +187,10 @@ class cpu_drv extends uvm_driver #(cpu_item);
         cur_req.aborted = 1'b1;
         seq_item_port.put(cur_req);
         cur_req = null;
+        n++;
       end
       outstanding = 0;
       next_id     = 0;
-      n++;
       `uvm_info("CPU_DRV", $sformatf("reset: %0d request(s) aborted", n), UVM_MEDIUM)
   endtask
 endclass

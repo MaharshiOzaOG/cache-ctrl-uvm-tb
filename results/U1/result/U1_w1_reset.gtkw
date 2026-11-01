@@ -1,0 +1,52 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Sun Nov 01 16:35:12 2026
+[*]
+[dumpfile] "M:\Projects\CACHE_CTRL\GITHUB\cache-ctrl-uvm-tb\results\U1\result\dump.vcd"
+[dumpfile_mtime] "Sat Oct 31 21:30:07 2026"
+[dumpfile_size] 556083
+[savefile] "M:\Projects\CACHE_CTRL\GITHUB\cache-ctrl-uvm-tb\results\U1\result\U1_w1_reset.gtkw"
+[timestart] 15128500
+[size] 1536 793
+[pos] -1 -1
+*-16.000000 15205000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_top.
+[treeopen] tb_top.cpu_if.
+[treeopen] tb_top.mem_if.
+[sst_width] 197
+[signals_width] 232
+[sst_expanded] 1
+[sst_vpaned_height] 138
+@24
+[color] 7
+tb_top.dut.clk
+>2000
+[color] 2
+tb_top.dut.rst_n
+>-28000
+[color] 7
+tb_top.cpu_if.drv_cb.drv_cb_event
+>0
+tb_top.cpu_if.drv_cb.req_addr[31:0]
+tb_top.cpu_if.drv_cb.req_id[3:0]
+tb_top.cpu_if.drv_cb.req_ready
+tb_top.cpu_if.drv_cb.req_valid
+tb_top.cpu_if.drv_cb.req_wdata[31:0]
+tb_top.cpu_if.drv_cb.req_we
+tb_top.cpu_if.drv_cb.req_wstrb[3:0]
+tb_top.cpu_if.drv_cb.rsp_err
+tb_top.cpu_if.drv_cb.rsp_id[3:0]
+tb_top.cpu_if.drv_cb.rsp_rdata[31:0]
+tb_top.cpu_if.drv_cb.rsp_ready
+tb_top.cpu_if.drv_cb.rsp_valid
+tb_top.cpu_if.drv_cb.rsp_we
+[color] 7
+tb_top.dut.state_d[3:0]
+tb_top.dut.state_q[3:0]
+@28
+[color] 7
+tb_top.cpu_if.drv_cb.req_valid
+[color] 7
+tb_top.cpu_if.drv_cb.rsp_ready
+[pattern_trace] 1
+[pattern_trace] 0

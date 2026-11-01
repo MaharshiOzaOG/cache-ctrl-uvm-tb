@@ -3,7 +3,8 @@
 Author: Maharshi Oza
 
 - **Detailed plan (phases, files, steps):** [`ROADMAP.md`](ROADMAP.md)
-- **U1–U4 step-by-step instructions:** [`UPGRADES.md`](UPGRADES.md)
+- **U1–U4 workbook (questions, hidden answers, waveform checks):** [`upgrades/`](upgrades/README.md)
+- **U1–U4 compact step list:** [`UPGRADES.md`](UPGRADES.md)
 - **Earlier full backlog (archived, for reference only):** [`archive/practice_backlog_v1.md`](archive/practice_backlog_v1.md)
 
 **Status key:** ✅ done · 🟡 in progress · ⬜ to do
@@ -14,7 +15,7 @@ Author: Maharshi Oza
 |---|---|
 | D1 back-to-back CPU requests (`cache_b2b_test`) | ✅ |
 | T1 set-7 eviction stream (`cache_thrash_test`) | ✅ |
-| U1 reset-aware CPU driver | 🟡 |
+| U1 reset-aware CPU driver | ✅ implementation, 🟡 W1 waveform check |
 | everything else in ROADMAP.md | ⬜ |
 
 ## Minimum path (complete picture)

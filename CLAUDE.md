@@ -24,7 +24,9 @@ write-back / write-allocate data cache controller). Work happens on the `dev` br
   - `tb/tests/`: `cache_base_test` + one file per test. **Every test must be `include`d in `tb/pkg/cache_tb_pkg.sv`.**
   - `make_single.py`: builds `uvm_tb_single/testbench.sv` for EDA Playground (`make single`).
 - `regression/`: `testplan.csv`, `merge_cov.py` (merges per-run `cov_*.csv`), `run_regression.sh`.
-- `practice/`: `README.md` (status + dependencies + quick reference), `ROADMAP.md` (phases 1–6), `UPGRADES.md` (explicit U1–U4 steps), `archive/` (old backlog).
+- `practice/`: `README.md` (status + dependencies + quick reference), `ROADMAP.md` (phases 1–6), `upgrades/U1..U4.md` (workbook: questions, hidden answers, waveform checks), `UPGRADES.md` (compact steps), `archive/` (old backlog).
+- `results/U<n>/`: my logs, waveform screenshots and `.gtkw` layouts per upgrade.
+- When I ask about a workbook question, give a hint first unless I ask for the answer.
 - `.github/workflows/make_single.yml`: on push to `dev`, regenerates `uvm_tb_single/testbench.sv` (pull afterwards).
 
 ## Key design facts
@@ -36,11 +38,8 @@ write-back / write-allocate data cache controller). Work happens on the `dev` br
 
 ## Status
 - Done: D1 (`cache_b2b_test`), T1 (`cache_thrash_test`).
-- U1 (reset-aware CPU driver), in progress:
-  - A–E done: `aborted` in `cpu_item`; `cur_req` (set after `get`, cleared on accept); `reset_state()` puts back every `inflight[]` item and `cur_req` with `aborted=1`, clears state; `run_phase` = `forever { wait rst_n=1; fork req/rsp threads join_none; wait rst_n=0; disable fork; reset_state(); }`; `do_op()` logs "aborted by reset".
-  - F done: `tb_reset_req` in `cache_cpu_if`, `always @(posedge cpu_if.tb_reset_req)` pulse in `tb_top`, `pulse_reset()` in `cache_base_vseq`.
-  - G in progress: `cache_reset_vseq` written; still to do: `tests/cache_reset_test.sv`, register in `cache_tb_pkg.sv`, run on EDA Playground.
-  - Check: second `n++` in `reset_state()` belongs inside `if (cur_req != null)`; remove unused `timeout_thread` and `cpu_rsp_timeout`.
+- U1 (reset-aware CPU driver): implementation done (A–G); `cache_reset_test` ran with 1 UVM_ERROR (expected until U2/U3). W1 waveform check in progress (`results/U1/`).
+  Design: `aborted` in `cpu_item`; `cur_req` (set after `get`, cleared on accept); `reset_state()` puts back `inflight[]` + `cur_req` with `aborted=1`; `run_phase` = `forever { wait rst_n=1; fork join_none; wait rst_n=0; disable fork; reset_state(); }`; `tb_reset_req` + `pulse_reset()` trigger mid-test reset.
 - Reset test plan: random ops → flush → loads only (`store_pct = 0`) → idle `pulse_reset()` → `fork { rand_ops | wait_cycles(rand) + pulse_reset }` → `store_pct = 50` → rand ops.
   Expected until U2/U3: `cpu_mon`, memory agent or scoreboard may still report errors around the reset.
 - Next: U2 (self-checking reset-aware CPU monitor), U3 (programmable memory + memory-side reset), U4 (targeted flush races). See `practice/UPGRADES.md`.

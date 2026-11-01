@@ -1,5 +1,7 @@
 # Upgrades U1–U4: step-by-step instructions
 
+> **New workbook:** [`upgrades/`](upgrades/README.md) has one page per upgrade with understanding questions, hidden hints/answers/why, checklists and waveform checks (W1–W4). Use it as the main working page; this file stays as the compact reference.
+
 Author: Maharshi Oza
 
 Plain, explicit steps for the four major upgrades. No code: each step says **which file**, **what to add or change**, and **why**.

@@ -1,0 +1,7 @@
+test=cache_reset_test
+run_id=none
+result=FAIL
+uvm_errors=1
+config=cfg=cache_cfg  cpu_rsp_ready=70% gap<=2 max_out=1 | mem_ready=70% lat=0..6 rd_err=0% wr_err=0% | pool tags 40+10 sets 0+4 store=50%
+scoreboard=loads=104 stores=35 | hits=47 clean_miss=77 dirty_miss=15 | mem rd=92 (err 0) wr=32 (err 0) | rsp_err=0 | data checked=104 skipped=0 MISMATCH=0 | flushes=2 (err 0) mem checks=2 bad bytes=0
+sim_time_ns=28195000

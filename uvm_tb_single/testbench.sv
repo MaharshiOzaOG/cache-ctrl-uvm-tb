@@ -610,9 +610,11 @@ class cpu_mon extends uvm_monitor;
   task run_phase(uvm_phase phase);
     cpu_item t;
     id_t     rid;
-    wait (vif.rst_n === 1'b1);
     forever begin
       @(vif.mon_cb);
+      if (vif.rst_n === 1'b0); begin
+
+      end
 
       if (vif.mon_cb.rsp_valid === 1'b1) begin
         rid = vif.mon_cb.rsp_id;
